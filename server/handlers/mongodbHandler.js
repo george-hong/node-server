@@ -1,49 +1,90 @@
 var MongoClient = require('mongodb').MongoClient;
 var DB_CONNECT_STR = "mongodb://localhost:27017/";
 var DATABASE_NAME_DEFAULT = 'blog';
-var error = undefined;
-var mongodbHandler = {
-  'connectCollection': connectCollection,
-  'insert': insert
-};
+var _undefined = undefined;
 
-function connectDataBase() {
-  var promise = new Promise(function (resolve, reject) {
-    MongoClient.connect(DB_CONNECT_STR, function (err, db) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(db);
-      }
-    });
-  });
-  return promise;
+function handlerErrorAndData(err, data, callback) {
+  if (err) {
+    callback && callback(err, _undefined);
+  } else {
+    callback && callback(_undefined, data);
+  }
 }
 
-function connectCollection(collectionName, connectDataBaseName) {
-  var dataBaseName = connectDataBaseName || DATABASE_NAME_DEFAULT;
-  var promise = new Promise(function (resolve, reject) {
-    connectDataBase()
-      .then(function (db) {
-        var dataBase = db.db(dataBaseName);
-        dataBase.collection(collectionName).find().toArray(function (err, result) {
-          if (err) {
-            reject(err);
-          } else {
-            db.close();
-            resolve(result);
-          }
-        });
-      }, function (err) {
-        reject(err);
+function connectClient(callback) {
+  MongoClient.connect(DB_CONNECT_STR, function (err, client) {
+    if (err) {
+      callback && callback(err, _undefined);
+    } else {
+      callback && callback(_undefined, client);
+    }
+  });
+}
+
+function connectDB (dbName, callback) {
+  connectClient(function (err, client) {
+    if (err) {
+      callback && callback(err, _undefined);
+    } else {
+      callback && callback(_undefined, client.db(dbName));
+      client.close();
+    }
+  })
+}
+
+function insert(data, collectionName, callback) {
+  connectDB('blog', function (err, db) {
+    if (err) {
+      callback && callback(err, _undefined);
+    } else {
+      db.collection(collectionName).insert(data, function (err, result) {
+        if (err) {
+          callback && callback(err, _undefined);
+        } else {
+          callback && callback(_undefined, result);
+        }
       });
+    }
   });
-  return promise;
 }
 
-function insert() {
-  
+function findOne(data, collectionName, callback) {
+  connectDB('blog', function (err, db) {
+    if (err) {
+      callback && callback(err, _undefined);
+    } else {
+      db.collection(collectionName).findOne(data, function (err, result) {
+        if (err) {
+          callback && callback(err, _undefined);
+        } else {
+          callback && callback(_undefined, result);
+        }
+      });
+    }
+  });
 }
 
+function findAll(data, collectionName, callback) {
+  connectDB('blog', function (err, db) {
+    if (err) {
+      callback && callback(err, _undefined);
+    } else {
+      db.collection(collectionName).findAll(data, function (err, result) {
+        if (err) {
+          callback && callback(err, _undefined);
+        } else {
+          callback && callback(_undefined, result);
+        }
+      });
+    }
+  });
+}
+
+
+
+var mongodbHandler = {
+  'insert': insert,
+  'findOne': findOne,
+  'findAll': findAll
+};
 module.exports = mongodbHandler;
-

@@ -1,0 +1,28 @@
+{
+  "name": "node-server",
+  "version": "0.0.1",
+  "description": "",
+  "main": "server/app.js",
+  "dependencies": {
+    "express": "^4.16.3",
+    "mongodb": "^3.0.5",
+    "vue": "^2.5.16"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node ./server/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a916856595/node-server.git"
+  },
+  "keywords": [
+    "node"
+  ],
+  "author": "hongchangjun",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/a916856595/node-server/issues"
+  },
+  "homepage": "https://github.com/a916856595/node-server#readme"
+}
