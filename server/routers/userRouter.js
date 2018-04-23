@@ -22,37 +22,47 @@ userRouter.get('/checkUserName', function (req, res, next) {
   var data = {
     'userName': req.query.userName
   };
-  userHandler.checkUserName(data, function (err, result) {
-    if (err) {
-      res.send(createErrData());
-    } else {
-      res.send(createSucData(result));
-    }
-  });
+  userHandler.checkUserName(data).then(result => {
+    res.send(createSucData(result));
+  }, err => {
+    res.send(createErrData());
+  })
 })
 
 userRouter.post('/login', function (req, res, next) {
   var data = req.body;
-  userHandler.login(data, function (err, result) {
-    if (err) {
-      res.send(createErrData());
-    } else if (result === 'success') {
-      res.send(createSucData());
+  userHandler.login(data).then(result => {
+    if (result === 1) {
+      res.send(createSucData({
+        'message': 'account unlive',
+        'code': result
+      }));
+    } else if (result === 2) {
+      res.send(createSucData({
+        'message': 'password error',
+        'code': result
+      }));
     } else {
-      res.send(createErrData(result));
+      res.send(createSucData({
+        'message': 'login success',
+        'code': result
+      }));
     }
+  }, (err) => {
+    res.send(createErrData());
   });
 });
 
 userRouter.post('/sign', function (req, res, next) {
   var data = req.body
-  userHandler.sign(data, function (err, result) {
-    if (err) {
-      res.send(createErrData());
-    } else {
-      res.send(createSucData());
-    }
-  })
+  userHandler.sign(data).then(result => {
+    res.send(createSucData({
+      'message': 'sign success',
+      'code': 0
+    }));
+  }, err => {
+    res.send(createErrData(err));
+  });
 });
 
 module.exports = userRouter;

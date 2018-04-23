@@ -1,7 +1,12 @@
 var MongoClient = require('mongodb').MongoClient;
 var DB_CONNECT_STR = "mongodb://localhost:27017/";
-var DATABASE_NAME_DEFAULT = 'blog';
+var CONFIG = require('../config.js');
 var _undefined = undefined;
+var mongodbHandler = {
+  'insert': insert,
+  'findOne': findOne,
+  'findAll': findAll
+};
 
 function handlerErrorAndData(err, data, callback) {
   if (err) {
@@ -11,80 +16,84 @@ function handlerErrorAndData(err, data, callback) {
   }
 }
 
-function connectClient(callback) {
-  MongoClient.connect(DB_CONNECT_STR, function (err, client) {
-    if (err) {
-      callback && callback(err, _undefined);
-    } else {
-      callback && callback(_undefined, client);
-    }
+function handlerDBError (err) {
+  console.log('mongodb error');
+}
+
+function connectClient() {
+  return new Promise(function (resolve, reject) {
+    MongoClient.connect(DB_CONNECT_STR, (err, client) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(client);
+      }
+    });
   });
 }
 
-function connectDB (dbName, callback) {
-  connectClient(function (err, client) {
-    if (err) {
-      callback && callback(err, _undefined);
-    } else {
-      callback && callback(_undefined, client.db(dbName));
-      client.close();
-    }
+function connectDB (dbName, client) {
+  return new Promise((resolve, reject) => {
+    var database = {
+      'db': client.db(dbName),
+      'close': client.close
+    };
+    resolve(database);
   })
 }
 
-function insert(data, collectionName, callback) {
-  connectDB('blog', function (err, db) {
-    if (err) {
-      callback && callback(err, _undefined);
-    } else {
-      db.collection(collectionName).insert(data, function (err, result) {
-        if (err) {
-          callback && callback(err, _undefined);
-        } else {
-          callback && callback(_undefined, result);
-        }
-      });
-    }
+function insert(data, collectionName) {
+  return new Promise((resolve, reject) => {
+    connectClient()
+      .then(client => {
+        return connectDB(CONFIG.defaultDatabaseName, client);
+      }, handlerDBError)
+      .then(database => {
+        database.db.collection(collectionName).insert(data, (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      })
   });
 }
 
-function findOne(data, collectionName, callback) {
-  connectDB('blog', function (err, db) {
-    if (err) {
-      callback && callback(err, _undefined);
-    } else {
-      db.collection(collectionName).findOne(data, function (err, result) {
-        if (err) {
-          callback && callback(err, _undefined);
-        } else {
-          callback && callback(_undefined, result);
-        }
-      });
-    }
+function findOne(data, collectionName) {
+  return new Promise((resolve, reject) => {
+    connectClient()
+      .then(client => {
+        return connectDB(CONFIG.defaultDatabaseName, client);
+      }, handlerDBError)
+      .then(database => {
+        database.db.collection(collectionName).findOne(data, (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      })
   });
 }
 
-function findAll(data, collectionName, callback) {
-  connectDB('blog', function (err, db) {
-    if (err) {
-      callback && callback(err, _undefined);
-    } else {
-      db.collection(collectionName).findAll(data, function (err, result) {
-        if (err) {
-          callback && callback(err, _undefined);
-        } else {
-          callback && callback(_undefined, result);
-        }
-      });
-    }
+function findAll(data, collectionName) {
+  return new Promise((resolve, reject) => {
+    connectClient()
+      .then(client => {
+        return connectDB(CONFIG.defaultDatabaseName, client);
+      }, handlerDBError)
+      .then(database => {
+        database.db.collection(collectionName).findAll(data, (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      })
   });
 }
 
-
-
-var mongodbHandler = {
-  'insert': insert,
-  'findOne': findOne,
-  'findAll': findAll
-};
 module.exports = mongodbHandler;
