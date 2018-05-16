@@ -4,6 +4,7 @@
   "description": "",
   "main": "server/app.js",
   "dependencies": {
+    "cookie-parser": "^1.4.3",
     "express": "^4.16.3",
     "mongodb": "^3.0.5",
     "vue": "^2.5.16"

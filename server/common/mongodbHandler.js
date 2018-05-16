@@ -4,17 +4,10 @@ var CONFIG = require('../config.js');
 var _undefined = undefined;
 var mongodbHandler = {
   'insert': insert,
+  'remove': remove,
   'findOne': findOne,
   'findAll': findAll
 };
-
-function handlerErrorAndData(err, data, callback) {
-  if (err) {
-    callback && callback(err, _undefined);
-  } else {
-    callback && callback(_undefined, data);
-  }
-}
 
 function handlerDBError (err) {
   console.log('mongodb error');
@@ -50,6 +43,24 @@ function insert(data, collectionName) {
       }, handlerDBError)
       .then(database => {
         database.db.collection(collectionName).insert(data, (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      })
+  });
+}
+
+function remove(data, collectionName) {
+  return new Promise((resolve, reject) => {
+    connectClient()
+      .then(client => {
+        return connectDB(CONFIG.defaultDatabaseName, client);
+      }, handlerDBError)
+      .then(database => {
+        database.db.collection(collectionName).remove(data, (err, result) => {
           if (err) {
             reject(err);
           } else {
