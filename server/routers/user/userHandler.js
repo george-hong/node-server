@@ -13,13 +13,20 @@ function login(data) {
       'userName': data.userName
     };
     mongodbHandler.findOne(dataModified, config.userDatabaseName).then(result => {
+      var responseDate = {
+        _id: ''
+      };
       if (result === null) {
-        resolve(1); //用户不存在
+        responseDate.status = 1;
+        resolve(responseDate); //用户不存在
       } else {
         if (result.password !== data.password) {
-          resolve(2); // 密码错误
+          responseDate.status = 2;
+          resolve(responseDate); // 密码错误
         } else {
-          resolve(0); // 登录成功
+          responseDate.status = 0;
+          responseDate._id = result._id;
+          resolve(responseDate); // 登录成功
         }
       }
     }, err => {
@@ -35,9 +42,9 @@ function sign(data) {
       'nickName': data.nickName,
       'password': data.password
     };
-    mongodbHandler.insert(dataModified, config.userDatabaseName).then((result) => {
+    mongodbHandler.insert(dataModified, config.userDatabaseName).then(result => {
       resolve(result);
-    }, (err) => {
+    }, err => {
       reject(err);
     });
   });

@@ -1,9 +1,9 @@
 var userRouter = require('express').Router();
-var userHandler = require('./userHandler.js');
 var serverUtils = require('../../common/serverUtils.js');
-var CONFIG = require('../../config.js');
+var cookieUtils = require('../../common/cookieUtils.js');
+var userHandler = require('./userHandler.js');
 
-userRouter.get('/checkUserName', function (req, res, next) {
+userRouter.get('/checkUserName', (req, res, next) => {
   var data = {
     'userName': req.query.userName
   };
@@ -12,28 +12,37 @@ userRouter.get('/checkUserName', function (req, res, next) {
   }, err => {
     res.send(serverUtils.createResponseData(0, 0));
   })
-})
+});
 
-userRouter.post('/login', function (req, res, next) {
+userRouter.post('/login', (req, res, next) => {
   var data = req.body;
-  userHandler.login(data).then(result => {
-    if (result === 1) {
+  userHandler.login(data).then(responseData => {
+    if (responseData.status === 1) {
       res.send(serverUtils.createResponseData(1, {
         'message': 'account unlive',
-        'code': result
+        'code': 1,
+        'userId': ''
       }));
-    } else if (result === 2) {
+    } else if (responseData.status === 2) {
       res.send(serverUtils.createResponseData(1, {
         'message': 'password error',
-        'code': result
+        'code': 2,
+        'userId': ''
       }));
     } else {
-      var sessionId = serverUtils.creatSessionId(30);
-      res.cookie('sessionId', sessionId, { expires: new Date(Date.now() + CONFIG.cookieSurvivalTime) });
-      res.send(serverUtils.createResponseData(1, {
-        'message': 'login success',
-        'code': result
-      }));
+      cookieUtils.setCookie(res, responseData._id).then(result => {
+        res.send(serverUtils.createResponseData(1, {
+          'message': 'login success',
+          'code': 0,
+          'userId': responseData._id
+        }));
+      }, err => {
+        res.send(serverUtils.createResponseData(0, {
+          'message': 'server error',
+          'code': 3,
+          'userId': ''
+        }));
+      });
     }
   }, (err) => {
     res.send(serverUtils.createResponseData(0, {
@@ -43,7 +52,7 @@ userRouter.post('/login', function (req, res, next) {
   });
 });
 
-userRouter.post('/sign', function (req, res, next) {
+userRouter.post('/sign', (req, res, next) => {
   var data = req.body
   userHandler.sign(data).then(result => {
     res.send(serverUtils.createResponseData(1, {
@@ -58,6 +67,15 @@ userRouter.post('/sign', function (req, res, next) {
       'id': ''
     }));
   });
+});
+
+userRouter.get('/userDetail', (req, res, next) => {
+  cookieUtils.checkCookie(req, res, next).then(result => {
+    console.log(result)
+    res.send('321321111');
+  }, msg => {
+    res.send(serverUtils.createResponseData(4, null));
+  })
 });
 
 module.exports = userRouter;

@@ -21,7 +21,7 @@ function creatSessionId(length = 20) {
   var chartsNum = chartsArr.length;
   var str = '';
   while (length) {
-    var randomNum = Math.round(Math.random() * chartsNum);
+    var randomNum = Math.round(Math.random() * (chartsNum - 1));
     str += chartsArr[randomNum];
     length--;
   }
