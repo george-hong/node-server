@@ -57,9 +57,9 @@ function checkUserName(data) {
     };
     mongodbHandler.findOne(dataModified, config.userDatabaseName).then((result) => {
       if (result === null) {
-        resolve(1); //用户名可用
+        resolve({ code: 1 }); //用户名可用
       } else {
-        resolve(0); //用户名不可用
+        resolve({ code: 0 }); //用户名不可用
       }
     }, (err) => {
       reject(err);
