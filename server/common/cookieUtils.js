@@ -1,5 +1,5 @@
 var serverUtils = require('./serverUtils.js');
-var CONFIG = require('../config.js');
+var config = require('../config.js');
 var mongodbHandler = require('./mongodbHandler.js');
 
 var cookieUtils = {
@@ -10,7 +10,7 @@ var cookieUtils = {
 function setCookie(res, userId) {
   return new Promise((resolve, reject) => {
     var sessionId = Date.now() + serverUtils.creatSessionId(30);
-    var endTime = Date.now() + CONFIG.cookieSurvivalTime;
+    var endTime = Date.now() + config.cookieSurvivalTime;
     var data = {
       sessionId,
       endTime,
@@ -26,10 +26,22 @@ function setCookie(res, userId) {
   });
 }
 
+//校验cookie,如cookie存在且在有效期内则resolve,否则reject
 function checkCookie(req, res, next) {
   return new Promise((resolve, reject) => {
-    if (req.headers.cookie) {
-      resolve();
+    var cookie = req.headers.cookie;
+    if (cookie) {
+      var data = { sessionId: cookie.slice(10) };
+      mongodbHandler.findOne(data, config.cookieFormName).then(dataFromDb => {
+        var currentTime = Date.now();
+        if (dataFromDb && currentTime <= dataFromDb.endTime) {
+          resolve(dataFromDb);
+        } else {
+          reject();
+        }
+      }, err => {
+        reject(err);
+      });
     } else {
       reject();
     }
@@ -38,7 +50,7 @@ function checkCookie(req, res, next) {
 
 function setCookieInDateBase(data) {
   return new Promise((resolve, reject) => {
-    mongodbHandler.insert(data, CONFIG.cookieFormName).then(result => {
+    mongodbHandler.insert(data, config.cookieFormName).then(result => {
       resolve(result);
     }, err => {
       reject(err);

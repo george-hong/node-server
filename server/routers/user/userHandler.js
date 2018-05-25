@@ -1,10 +1,12 @@
 var mongodbHandler = require('../../common/mongodbHandler.js');
 var config = require('../../config.js');
+var ObjectId = require('mongodb').ObjectID;
 
 var userHandler = {
-  'login': login,
-  'sign': sign,
-  'checkUserName': checkUserName
+  login,
+  sign,
+  checkUserName,
+  userDetail
 };
 
 function login(data) {
@@ -12,20 +14,20 @@ function login(data) {
     var dataModified = {
       'userName': data.userName
     };
-    mongodbHandler.findOne(dataModified, config.userDatabaseName).then(result => {
+    mongodbHandler.findOne(dataModified, config.userDatabaseName).then(dataFromDb => {
       var responseDate = {
         _id: ''
       };
-      if (result === null) {
+      if (dataFromDb === null) {
         responseDate.status = 1;
         resolve(responseDate); //用户不存在
       } else {
-        if (result.password !== data.password) {
+        if (dataFromDb.password !== data.password) {
           responseDate.status = 2;
           resolve(responseDate); // 密码错误
         } else {
           responseDate.status = 0;
-          responseDate._id = result._id;
+          responseDate._id = dataFromDb._id;
           resolve(responseDate); // 登录成功
         }
       }
@@ -38,12 +40,13 @@ function login(data) {
 function sign(data) {
   return new Promise((resolve, reject) => {
     var dataModified = {
-      'userName': data.userName,
-      'nickName': data.nickName,
-      'password': data.password
+      userName: data.userName,
+      nickName: data.nickName,
+      password: data.password,
+      userGroup:  config.defaultUserGroup
     };
-    mongodbHandler.insert(dataModified, config.userDatabaseName).then(result => {
-      resolve(result);
+    mongodbHandler.insert(dataModified, config.userDatabaseName).then(dataFromDb => {
+      resolve(dataFromDb);
     }, err => {
       reject(err);
     });
@@ -62,6 +65,29 @@ function checkUserName(data) {
         resolve({ code: 0 }); //用户名不可用
       }
     }, (err) => {
+      reject(err);
+    });
+  });
+}
+
+function userDetail(data) {
+  var dataModified = {
+    _id: ObjectId(data.userId)
+  };
+  return new Promise((resolve, reject) => {
+    mongodbHandler.findOne(dataModified, config.userDatabaseName).then(dataFromDb => {
+      if (dataFromDb) {
+        var dataOfResponse = {
+          userName: dataFromDb.userName,
+          nickName: dataFromDb.nickName,
+          password: dataFromDb.password,
+          userGroup: dataFromDb.userGroup
+        };
+        resolve(dataOfResponse);
+      } else {
+        resolve(null);
+      }
+    }, err => {
       reject(err);
     });
   });

@@ -104,3 +104,18 @@ router.use('/', (req, res, next) => {
 });
 ````
 
+# monogdb相关
+
+## 操作ObjectId
+
+> 根据mongodb自动生成的ObjectId来操作数据
+
+``````javascript
+// get ObjectId Methods
+var ObjectId = require('mongodb').ObjectID;
+var data = {
+    _id: ObjectId(data.userId)
+  };
+db.findOne(data, function (){...});
+``````
+
