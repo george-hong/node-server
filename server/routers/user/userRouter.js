@@ -5,7 +5,7 @@ var userHandler = require('./userHandler.js');
 
 userRouter.get('/checkUserName', (req, res, next) => {
   var data = {
-    userName: req.query.userName
+    userName: req.query.userName || ''
   };
   userHandler.checkUserName(data).then(result => {
     res.send(serverUtils.createResponseData(1, result));
@@ -57,7 +57,7 @@ userRouter.post('/sign', (req, res, next) => {
   userHandler.sign(data).then(result => {
     res.send(serverUtils.createResponseData(1, {
       message: 'sign success',
-     code: 0,
+      code: 0,
       id: result.ops[0]._id
     }));
   }, err => {

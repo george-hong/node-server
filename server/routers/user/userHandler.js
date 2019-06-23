@@ -43,7 +43,7 @@ function sign(data) {
       userName: data.userName,
       nickName: data.nickName,
       password: data.password,
-      userGroup:  config.defaultUserGroup
+      userGroup: config.defaultUserGroup
     };
     mongodbHandler.insert(dataModified, config.userDatabaseName).then(dataFromDb => {
       resolve(dataFromDb);
@@ -60,9 +60,9 @@ function checkUserName(data) {
     };
     mongodbHandler.findOne(dataModified, config.userDatabaseName).then((result) => {
       if (result === null) {
-        resolve({ code: 1 }); //用户名可用
+        resolve({ usable: 'usable' }); //用户名可用
       } else {
-        resolve({ code: 0 }); //用户名不可用
+        resolve({ usable: 'disabled' }); //用户名不可用
       }
     }, (err) => {
       reject(err);
