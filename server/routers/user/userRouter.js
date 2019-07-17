@@ -34,7 +34,8 @@ userRouter.post('/login', (req, res, next) => {
         res.send(serverUtils.createResponseData(1, {
           message: 'login success',
           code: 0,
-          userId: dataFromDB._id
+          userId: dataFromDB._id,
+          nickName: dataFromDB.nickName
         }));
       }, err => {
         res.send(serverUtils.createResponseData(0, {

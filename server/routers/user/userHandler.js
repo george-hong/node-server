@@ -28,6 +28,7 @@ function login(data) {
         } else {
           responseDate.status = 0;
           responseDate._id = dataFromDb._id;
+          responseDate.nickName = dataFromDb.nickName;
           resolve(responseDate); // 登录成功
         }
       }
