@@ -5,14 +5,14 @@ var ObjectId = require('mongodb').ObjectID;
 var userHandler = {
   login,
   sign,
-  checkUserName,
+  checkAccount,
   userDetail
 };
 
 function login(data) {
   return new Promise((resolve, reject) => {
     var dataModified = {
-      'userName': data.userName
+      account: data.account
     };
     mongodbHandler.findOne(dataModified, config.userDatabaseName).then(dataFromDb => {
       var responseDate = {
@@ -40,8 +40,8 @@ function login(data) {
 function sign(data) {
   return new Promise((resolve, reject) => {
     var dataModified = {
-      userName: data.userName,
-      nickName: data.nickName,
+      account: data.account,
+      nickName: data.nickName || 'user',
       password: data.password,
       userGroup: config.defaultUserGroup
     };
@@ -53,10 +53,10 @@ function sign(data) {
   });
 }
 
-function checkUserName(data) {
+function checkAccount(data) {
   return new Promise((resolve, reject) => {
     var dataModified = {
-      'userName': data.userName
+      account: data.account
     };
     mongodbHandler.findOne(dataModified, config.userDatabaseName).then((result) => {
       if (result === null) {
@@ -78,7 +78,7 @@ function userDetail(data) {
     mongodbHandler.findOne(dataModified, config.userDatabaseName).then(dataFromDb => {
       if (dataFromDb) {
         var dataOfResponse = {
-          userName: dataFromDb.userName,
+          account: dataFromDb.account,
           nickName: dataFromDb.nickName,
           password: dataFromDb.password,
           userGroup: dataFromDb.userGroup

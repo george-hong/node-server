@@ -3,11 +3,11 @@ var serverUtils = require('../../common/serverUtils.js');
 var cookieUtils = require('../../common/cookieUtils.js');
 var userHandler = require('./userHandler.js');
 
-userRouter.get('/checkUserName', (req, res, next) => {
+userRouter.get('/checkAccount', (req, res, next) => {
   var data = {
-    userName: req.query.userName || ''
+    account: req.query.account || ''
   };
-  userHandler.checkUserName(data).then(result => {
+  userHandler.checkAccount(data).then(result => {
     res.send(serverUtils.createResponseData(1, result));
   }, err => {
     res.send(serverUtils.createResponseData(0, 0));
